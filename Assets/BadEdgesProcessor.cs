@@ -81,6 +81,7 @@ public class BadEdgesProcessor
                     bad_edges.Add(edge.Key);
                 }
             }
+            Debug.Log("Bad edge count: " + bad_edges.Count);
             if (bad_edges.Count == 0)
                 continue;
 

@@ -2,7 +2,7 @@
 {
     Properties
     {
-        _Color ("Color", Color) = (1,1,1,1)
+        _Color ("Color", Color) = (1,1,1,1)	
         _SectionColor ("SectionColor", Color) = (0, 1, 0, 1)
         _CrossPlanePosition ("CrossPlanePosition", Vector) = (0, 0, 0, 1)
         _CrossPlaneVisibleNormal ("CrossPlaneVisibleDirection", Vector) = (1, 0, 0, 1)
@@ -20,6 +20,8 @@
                 Ref 1
                 PassFront Keep
                 PassBack Keep
+                FailFront Keep
+                FailBack keep
                 ZFailFront Keep
                 ZFailBack Keep
                 Comp Equal

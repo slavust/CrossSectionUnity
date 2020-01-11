@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
 public class crossableModel : MonoBehaviour
 {
     public List<GameObject> CutPlaneObjects;
@@ -10,7 +10,7 @@ public class crossableModel : MonoBehaviour
     void Start()
     {
         UpdateBadContoursMaterial();
-        if (m_bad_contours_game_object != null)
+        if (m_bad_contours_game_object == null)
         {
             m_bad_contours_game_object = new GameObject("bad_contour");
             m_bad_contours_game_object.transform.SetParent(gameObject.transform, false);
@@ -71,6 +71,7 @@ public class crossableModel : MonoBehaviour
         if (m_object_mesh && (recalculate_initial_bad_contours || m_bad_contours == null))
         {
             m_bad_contours = BadEdgesProcessor.FindMeshBadContours(m_object_mesh);
+            Debug.Log("Bad contour count:" + m_bad_contours.Count);
         }
 
         List<CrossSection> cross_sections = GenerateCrossSectionList();
@@ -78,7 +79,7 @@ public class crossableModel : MonoBehaviour
         UpdateBadContoursMaterial();
 
         foreach (Transform child in m_bad_contours_game_object.transform)
-            DestroyImmediate(child.gameObject);
+            Destroy(child.gameObject);
 
         foreach (BadContour bad_contour in m_bad_contours)
         {
@@ -106,10 +107,10 @@ public class crossableModel : MonoBehaviour
     void Update()
     {
         UpdateBadContours();
-        GetComponent<Renderer>().material.SetVector(
+        GetComponent<Renderer>().sharedMaterial.SetVector(
             "_CrossPlanePosition",
             CutPlaneObjects[0].transform.position);   
-        GetComponent<Renderer>().material.SetVector(
+        GetComponent<Renderer>().sharedMaterial.SetVector(
             "_CrossPlaneVisibleNormal",
             CutPlaneObjects[0].transform.up);
     }

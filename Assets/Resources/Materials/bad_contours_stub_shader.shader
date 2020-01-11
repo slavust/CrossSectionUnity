@@ -3,21 +3,19 @@
     SubShader
     {
         Tags { "Queue" = "Geometry" }    
-        Cull Off
         Pass
         {
+            Cull Off
             Stencil
             {
-                WriteMask 1
-                Ref 1
-                FailFront IncrWrap
-                FailBack IncrWrap
-                ZFailFront IncrWrap
-                ZFailBack IncrWrap
+                WriteMask 255
+                PassFront IncrWrap
+                PassBack IncrWrap
                 Comp Always
             }
-	        ZTest Never
+	        ZTest Always
             ZWrite Off
+            ColorMask 0
         }
     }
 }

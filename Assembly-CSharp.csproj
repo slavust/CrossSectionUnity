@@ -60,6 +60,7 @@
      <None Include="Assets\Resources\Materials\bad_contours_stub_shader.shader" />
      <None Include="Assets\meshes\section.shader" />
      <None Include="Assets\meshes\crossed_surface_shader.shader" />
+     <None Include="Assets\meshes\Old House 2\Info.txt" />
  <Reference Include="Unity.TextMeshPro.Editor">
  <HintPath>/home/slavust/projects/unity/New Unity Project/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
  </Reference>

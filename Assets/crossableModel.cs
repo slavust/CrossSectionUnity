@@ -5,7 +5,22 @@ using UnityEngine;
 //[ExecuteInEditMode]
 public class crossableModel : MonoBehaviour
 {
-    public List<GameObject> CutPlaneObjects;
+    public GameObject CutPlaneObject1 = null;
+    public GameObject CutPlaneObject2 = null;
+    public GameObject CutPlaneObject3 = null;
+
+
+    private List<GameObject> GetCutPlaneObjectsList()
+    {
+        List<GameObject> cross_sections = new List<GameObject>();
+        if (CutPlaneObject1 != null)
+            cross_sections.Add(CutPlaneObject1);
+        if (CutPlaneObject2 != null)
+            cross_sections.Add(CutPlaneObject2);
+        if (CutPlaneObject3 != null)
+            cross_sections.Add(CutPlaneObject3);
+        return cross_sections;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -48,7 +63,7 @@ public class crossableModel : MonoBehaviour
     List<CrossSection> GenerateCrossSectionList()
     {
         List<CrossSection> cross_sections = new List<CrossSection>();
-        foreach(var cut_plane in CutPlaneObjects)
+        foreach(var cut_plane in GetCutPlaneObjectsList())
         {
             var cross_section = new CrossSection();
             cross_section.m_position = transform.worldToLocalMatrix.MultiplyPoint(cut_plane.transform.position);
@@ -103,16 +118,37 @@ public class crossableModel : MonoBehaviour
         Debug.Assert(m_bad_contour_stub_material != null);
     }
 
+    void UpdateSurfaceMaterial()
+    {
+        Vector4[] cut_plane_world_positions = new Vector4[3];
+        Vector4[] cut_plane_world_normals = new Vector4[3];
+
+        List<GameObject> cross_plane_objects = GetCutPlaneObjectsList();
+
+        for (int i = 0; i < cross_plane_objects.Count; ++i)
+        {
+            cut_plane_world_positions[i] = 
+                cross_plane_objects[i].transform.position;
+            cut_plane_world_normals[i] =
+                cross_plane_objects[i].transform.up;
+        }
+
+        GetComponent<Renderer>().sharedMaterial.SetVectorArray(
+            "_CrossPlanePositions",
+            cut_plane_world_positions);
+        GetComponent<Renderer>().sharedMaterial.SetVectorArray(
+            "_CrossPlaneVisibleNormals",
+            cut_plane_world_normals);
+        GetComponent<Renderer>().sharedMaterial.SetInt(
+            "_CrossPlaneCount",
+            cross_plane_objects.Count);
+    }
+
     // Update is called once per frame
     void Update()
     {
         UpdateBadContours();
-        GetComponent<Renderer>().sharedMaterial.SetVector(
-            "_CrossPlanePosition",
-            CutPlaneObjects[0].transform.position);   
-        GetComponent<Renderer>().sharedMaterial.SetVector(
-            "_CrossPlaneVisibleNormal",
-            CutPlaneObjects[0].transform.up);
+        UpdateSurfaceMaterial();
     }
 
     private Mesh m_object_mesh = null;

@@ -19,7 +19,7 @@
                 ReadMask 1
                 Ref 1
                 PassFront Keep
-                PassBack Keep
+                PassBack keep
                 FailFront Keep
                 FailBack keep
                 ZFailFront Keep

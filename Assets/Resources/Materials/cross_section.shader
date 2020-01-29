@@ -1,4 +1,4 @@
-﻿Shader "Custom/section"
+﻿Shader "Custom/CrossSection"
 {
     Properties
     {
@@ -7,17 +7,17 @@
     }
     SubShader
     {
-        Tags { "Queue" = "Geometry+1" "RenderType" = "Transparent"} 
-        Cull Off
+        Tags { "RenderType" = "Transparent"} 
         Pass
         {
+            Cull Back
             Stencil
             {
-                WriteMask 255
+                WriteMask 0
                 ReadMask 1
                 Ref 1
-                PassFront Zero
-                PassBack Zero
+                PassFront Keep
+                PassBack Keep
                 FailFront Keep
                 FailBack keep
                 Comp Equal
@@ -28,6 +28,7 @@
 
             uniform float4 _SectionColor;
             uniform sampler2D _SectionTex;
+            uniform float4 _SectionTex_ST; // tiling and offset
 
             struct VERT_INPUT
             {
@@ -53,12 +54,30 @@
 
             float4 frag(in FRAG_INPUT IN) : COLOR
             {
-                float4 tex_color = tex2D(_SectionTex, IN.uv_SectionTex) * _SectionColor;
+                float4 tex_color = tex2D(_SectionTex, IN.uv_SectionTex * _SectionTex_ST.xy) * _SectionColor;
                 float3 normal = normalize(IN.view_space_normal);
-                float NdotL = dot(normal, -normalize(IN.view_space_pos));
+                float NdotL = 1.0; //dot(normal, -normalize(IN.view_space_pos));
                 return tex_color * NdotL;
             }
             ENDCG
+        }
+        Pass
+        {
+            Cull Back
+            Stencil
+            {
+                WriteMask 255
+                ReadMask 1
+                Ref 1
+                PassFront IncrWrap
+                PassBack IncrWrap
+                FailFront Keep
+                FailBack keep
+                Comp Equal
+            }
+            ColorMask 0
+            ZWrite off
+            ZTest Always
         }
     }
 }

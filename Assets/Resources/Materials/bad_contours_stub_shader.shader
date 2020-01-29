@@ -1,4 +1,4 @@
-﻿Shader "Custom/bad_contour_stub_shader"
+﻿Shader "Custom/BadContourStub"
 {
     SubShader
     {

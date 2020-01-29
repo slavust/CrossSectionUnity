@@ -1,4 +1,4 @@
-﻿Shader "Custom/cut_shader"
+﻿Shader "Custom/CrossedSurface"
 {
     Properties
     {

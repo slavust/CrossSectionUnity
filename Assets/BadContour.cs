@@ -1,6 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+
+public struct CrossSectionInfo
+{
+    public Vector3 m_position;
+    public Vector3 m_normal;
+}
+
 public class BadContour
 {
     public BadContour()
@@ -81,7 +88,7 @@ public class BadContour
         return m_stub_mesh;
     }
 
-    public BadContour GenerateFrameBadContour(List<CrossSection> model_cross_sections)
+    public BadContour GenerateFrameBadContour(List<CrossSectionInfo> model_cross_sections)
     {
         List<Vector3> cur_points = new List<Vector3>(m_points);
 
@@ -137,7 +144,7 @@ public class BadContour
         return new BadContour(cur_points);
     }
 
-    private bool BoundingSphereIntersectsCrossSection(CrossSection cross_section)
+    private bool BoundingSphereIntersectsCrossSection(CrossSectionInfo cross_section)
     {
         UpdateBoundingSphere();
         Vector3 plane_pos_to_sphere_center = m_bounding_sphere.position - cross_section.m_position;
@@ -145,7 +152,7 @@ public class BadContour
         return distance_to_plane <= m_bounding_sphere.radius;
     }
 
-    private List<bool> CalculateVisibilityForPointList(List<Vector3> points, CrossSection cross_section)
+    private List<bool> CalculateVisibilityForPointList(List<Vector3> points, CrossSectionInfo cross_section)
     {
         List<bool> visibility = new List<bool>();
         for (int i = 0; i < points.Count; ++i)
@@ -156,7 +163,7 @@ public class BadContour
         return visibility;
     }
 
-    private bool CalculateVisibilityForPoint(Vector3 point, CrossSection cross_section)
+    private bool CalculateVisibilityForPoint(Vector3 point, CrossSectionInfo cross_section)
     {
         Vector3 plane_pos_to_point = Vector3.Normalize(point - cross_section.m_position);
         var dot = Vector3.Dot(plane_pos_to_point, cross_section.m_normal);

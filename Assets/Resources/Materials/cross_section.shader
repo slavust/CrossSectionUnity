@@ -7,7 +7,7 @@
     }
     SubShader
     {
-        Tags { "RenderType" = "Transparent"} 
+        Tags { "Queue" = "Geometry" } 
         Pass
         {
             Cull Back
@@ -69,11 +69,11 @@
                 WriteMask 255
                 ReadMask 1
                 Ref 1
-                PassFront IncrWrap
-                PassBack IncrWrap
-                FailFront Keep
-                FailBack keep
-                Comp Equal
+                PassFront Zero
+                PassBack Zero
+                FailFront Zero
+                FailBack Zero
+                Comp Always
             }
             ColorMask 0
             ZWrite off

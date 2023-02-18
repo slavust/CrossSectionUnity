@@ -1,4 +1,4 @@
-﻿Shader "Custom/BadContourStub"
+﻿Shader "CrossSections/_BadContourStub"
 {
     SubShader
     {
@@ -31,7 +31,7 @@
                 float3 world_pos : TEXCOORD0;
             };
 
-            void vert(float4 vertex_local : POSITION, inout VERT_OUT OUT) 
+            void vert(float4 vertex_local : POSITION, out VERT_OUT OUT) 
             {
                 OUT.pos = UnityObjectToClipPos(vertex_local);
                 OUT.world_pos = mul(unity_ObjectToWorld, vertex_local).xyz;
@@ -48,9 +48,9 @@
                 return is_invisible[0] && is_invisible[1] && is_invisible[2];
             }
 
-            float4 frag(float3 world_pos : TEXCOORD0) : COLOR
+            float4 frag(in VERT_OUT IN) : COLOR
             {
-                if(IsFragmentClipped(world_pos))
+                if(IsFragmentClipped(IN.world_pos))
                     discard;
                 return float4(1, 1, 1, 1);
             }

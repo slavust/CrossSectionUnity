@@ -1,8 +1,8 @@
-﻿Shader "Custom/CrossSection"
+﻿Shader "CrossSections/_CrossSection"
 {
     Properties
     {
-        _SectionColor ("SectionColor", Color) = (0, 1, 0, 1)
+        _SectionColor("Section Color", Color) = (0, 1, 0, 1)
         _SectionTex("Section Texture", 2D) = "white" {}
     }
     SubShader
@@ -13,7 +13,7 @@
             Cull Back
             Stencil
             {
-                WriteMask 0
+                WriteMask 255
                 ReadMask 1
                 Ref 1
                 PassFront Keep
@@ -39,25 +39,20 @@
 
             struct FRAG_INPUT
             {
+                float4 position : SV_POSITION;
                 float2 uv_SectionTex : TEXCOORD0;
-                float3 view_space_pos : TEXCOORD1;
-                float3 view_space_normal : TEXCOORD2;
             };
 
-            float4 vert(in VERT_INPUT VERT_IN, out FRAG_INPUT FRAG_IN) : SV_POSITION
+            void vert(in VERT_INPUT VERT_IN, out FRAG_INPUT FRAG_IN)
             {
-                FRAG_IN.view_space_pos = mul(UNITY_MATRIX_MV, VERT_IN.local_pos);
                 FRAG_IN.uv_SectionTex = VERT_IN.uv_SectionTex;
-                FRAG_IN.view_space_normal = mul(UNITY_MATRIX_MV, VERT_IN.local_normal);
-                return UnityObjectToClipPos(VERT_IN.local_pos);
+                FRAG_IN.position = UnityObjectToClipPos(VERT_IN.local_pos);
             }
 
-            float4 frag(in FRAG_INPUT IN) : COLOR
+            float4 frag(in FRAG_INPUT input) : COLOR
             {
-                float4 tex_color = tex2D(_SectionTex, IN.uv_SectionTex * _SectionTex_ST.xy) * _SectionColor;
-                float3 normal = normalize(IN.view_space_normal);
-                float NdotL = 1.0; //dot(normal, -normalize(IN.view_space_pos));
-                return tex_color * NdotL;
+                float4 tex_color = tex2D(_SectionTex, input.uv_SectionTex * _SectionTex_ST.xy) * _SectionColor;
+                return tex_color;
             }
             ENDCG
         }

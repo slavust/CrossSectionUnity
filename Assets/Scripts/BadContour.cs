@@ -91,58 +91,6 @@ public class BadContour
     public BadContour GenerateFrameBadContour(List<CrossSectionInfo> model_cross_sections)
     {
         return this;
-        //List<Vector3> cur_points = new List<Vector3>(m_points);
-
-        //bool points_updated = false;
-
-        //for (int cross_section_i = 0; cross_section_i < model_cross_sections.Count; ++cross_section_i)
-        //{
-        //    if (cur_points.Count == 0)
-        //        break;
-        //
-        //    var cur_cross_section = model_cross_sections[cross_section_i];
-            //if (!BoundingSphereIntersectsCrossSection(cur_cross_section))
-            //{
-            //    bool contour_is_visible = CalculateVisibilityForPoint(
-            //        m_bounding_sphere.position, cur_cross_section);
-            //    if (!contour_is_visible)
-            //        return null;
-            //    continue;
-            //}
-
-        /*List<bool> cur_points_visibility =
-        CalculateVisibilityForPointList(
-            cur_points,
-            model_cross_sections);
-
-        List<Vector3> new_points = new List<Vector3>();
-
-        for (int i = 0, j = i + 1; i < cur_points.Count; ++i, ++j)
-        {
-            if (cur_points_visibility[i])
-                new_points.Add(cur_points[i]);
-
-            bool edge_intersects_cross_section =
-                cur_points_visibility[i] != cur_points_visibility[j % cur_points.Count];
-            if (!edge_intersects_cross_section)
-                continue;
-            points_updated = true;
-            Vector3 intersection_pos = CalculateEdgeWithPlaneIntersection(
-                cur_points[i],
-                cur_points[j % cur_points.Count],
-                cur_cross_section.m_position,
-                cur_cross_section.m_normal);
-            new_points.Add(intersection_pos);
-        }
-        cur_points = new_points;
-        //}
-
-        if (cur_points.Count == 0) // all invisible
-            return null;
-        if (!points_updated) // no need to recalculate mesh (?)
-            return this;
-
-        return new BadContour(cur_points);*/
     }
 
     private bool BoundingSphereIntersectsCrossSection(CrossSectionInfo cross_section)

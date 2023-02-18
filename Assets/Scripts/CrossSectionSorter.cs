@@ -5,35 +5,6 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class CrossSectionSorter : Singleton<CrossSectionSorter>
 {
-    public Camera camera = null;
-    private List<CrossSection> m_frame_cross_sections = new List<CrossSection>();
-
-    public void NorifyFrameCrossSection(CrossSection cross_section)
-    {
-        m_frame_cross_sections.Add(cross_section);
-    }
-
-
-    private class CrossSectionComparer : IComparer<CrossSection>
-    {
-        private Camera m_camera = null;
-        public CrossSectionComparer(Camera camera)
-        {
-            m_camera = camera;
-        }
-        int IComparer<CrossSection>.Compare(CrossSection x, CrossSection y)
-        {
-            float x_distance = Vector3.Distance(x.transform.position, m_camera.transform.position);
-            float y_distance = Vector3.Distance(y.transform.position, m_camera.transform.position);
-
-            if (x_distance > y_distance)
-                return -1;
-            if (x_distance < y_distance)
-                return 1;
-            return 0;
-        }
-    }
-
     Dictionary<CrossSection, List<CrossableModel>> m_crossable_models_by_sections = new Dictionary<CrossSection, List<CrossableModel>>();
     public void NotifyFrameCrossableModel(CrossableModel crossable_model)
     {

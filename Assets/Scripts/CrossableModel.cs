@@ -7,11 +7,9 @@ public class CrossableModel : MonoBehaviour
 {
     public CrossSection CrossSectionObject = null;
 
-    // Start is called before the first frame update
     void Start()
     {
         Reset();
-        UpdateBadContoursMaterial();
         if (m_bad_contours_game_object == null)
         {
             m_bad_contours_game_object = new GameObject("_bad_contours");
@@ -21,10 +19,10 @@ public class CrossableModel : MonoBehaviour
 
     void Reset()
     {
-        ResetSurfaceMaterial();
+        //ResetSurfaceMaterial();
         if(m_bad_contours_game_object == null)
         {
-            var child_transform = transform.Find("_bad_contours");
+            var child_transform = transform.Find("_bad_contours"); ;
             if (child_transform != null)
                 m_bad_contours_game_object = child_transform.gameObject;
         }
@@ -33,6 +31,9 @@ public class CrossableModel : MonoBehaviour
             DestroyImmediate(m_bad_contours_game_object);
             m_bad_contours_game_object = null;
         }
+        m_bad_contours = null;
+        m_object_mesh = null;
+        m_bad_contour_stub_material = null;
     }
 
     void OnEnable()
@@ -85,52 +86,45 @@ public class CrossableModel : MonoBehaviour
         if (GetComponent<MeshFilter>())
         {
             Mesh object_mesh = GetComponent<MeshFilter>().sharedMesh;
-            if (object_mesh != m_object_mesh)
+            if (object_mesh != null && object_mesh != m_object_mesh)
                 recalculate_initial_bad_contours = true;
             m_object_mesh = object_mesh;
         }
-        if (m_object_mesh && (recalculate_initial_bad_contours || m_bad_contours == null))
+        if (recalculate_initial_bad_contours)
         {
             m_bad_contours = BadEdgesProcessor.FindMeshBadContours(m_object_mesh);
-            Debug.Log("Bad contour count:" + m_bad_contours.Count);
+
+            List<CrossSectionInfo> cross_sections = CrossSectionObject.GenerateCrossPlanesList();
+            cross_sections = TransformCrossSectionsToObjectSpace(cross_sections);
+
+            if(m_bad_contour_stub_material == null)
+                m_bad_contour_stub_material = new Material(Shader.Find("CrossSections/_BadContourStub"));
+
+            List<CombineInstance> combine = new List<CombineInstance>();
+            foreach (BadContour bad_Contour in m_bad_contours)
+            {
+                BadContour subcontour = bad_Contour.GenerateFrameBadContour(cross_sections);
+                if (subcontour == null)
+                    continue;
+                var combine_inst = new CombineInstance();
+                combine_inst.mesh = subcontour.GenerateStubMesh();
+                combine.Add(combine_inst);
+            }
+
+            MeshFilter mesh_filter = m_bad_contours_game_object.GetComponent<MeshFilter>();
+            if (mesh_filter == null)
+                mesh_filter = m_bad_contours_game_object.AddComponent<MeshFilter>();
+            mesh_filter.sharedMesh = new Mesh();
+            mesh_filter.sharedMesh.CombineMeshes(combine.ToArray(), true, false);
+
+            MeshRenderer renderer = m_bad_contours_game_object.GetComponent<MeshRenderer>();
+            if (renderer == null)
+                renderer = m_bad_contours_game_object.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = m_bad_contour_stub_material;
+            m_bad_contours_game_object.SetActive(true);
         }
-
-        List<CrossSectionInfo> cross_sections = CrossSectionObject.GenerateCrossPlanesList();
-        cross_sections = TransformCrossSectionsToObjectSpace(cross_sections);
-
-        UpdateBadContoursMaterial();
-
-        List<CombineInstance> combine = new List<CombineInstance>();
-        foreach(BadContour bad_Contour in m_bad_contours)
-        {
-            BadContour subcontour = bad_Contour.GenerateFrameBadContour(cross_sections);
-            if (subcontour == null)
-                continue;
-            var combine_inst = new CombineInstance();
-            combine_inst.mesh = subcontour.GenerateStubMesh();
-            combine.Add(combine_inst);
-        }
-
-        MeshFilter mesh_filter = m_bad_contours_game_object.GetComponent<MeshFilter>();
-        if (mesh_filter == null)
-            mesh_filter = m_bad_contours_game_object.AddComponent<MeshFilter>();
-        mesh_filter.mesh = new Mesh();
-        mesh_filter.mesh.CombineMeshes(combine.ToArray(), true, false);
-
-        MeshRenderer renderer = m_bad_contours_game_object.GetComponent<MeshRenderer>();
-        if (renderer == null)
-            renderer = m_bad_contours_game_object.AddComponent<MeshRenderer>();
-        renderer.sharedMaterial = m_bad_contour_stub_material;
-        m_bad_contours_game_object.SetActive(true);
     }
-
-    void UpdateBadContoursMaterial()
-    {
-        if (m_bad_contour_stub_material != null)
-            return;
-        m_bad_contour_stub_material = new Material(Resources.Load<Material>("Materials/bad_contour_stub"));
-    }
-
+    /*
     void ResetSurfaceMaterial()
     {
         Vector4[] cut_plane_world_positions = new Vector4[3];
@@ -143,7 +137,7 @@ public class CrossableModel : MonoBehaviour
                 new Vector4(0, 0, Mathf.Pow(-1, i), 1);
         }
 
-        foreach (var material in GetComponent<Renderer>().materials)
+        foreach (var material in GetComponent<MeshRenderer>().materials)
         {
             material.SetVectorArray(
                 "_CrossPlanePositions",
@@ -152,7 +146,7 @@ public class CrossableModel : MonoBehaviour
                 "_CrossPlaneVisibleNormals",
                 cut_plane_world_normals);
         }
-    }
+    }*/
 
     void UpdateMaterials()
     {
@@ -169,7 +163,7 @@ public class CrossableModel : MonoBehaviour
                 cross_plane_objects[i].m_normal;
         }
 
-        foreach(var material in GetComponent<Renderer>().materials)
+        foreach(var material in GetComponent<Renderer>().sharedMaterials)
         {
             material.SetVectorArray(
                 "_CrossPlanePositions",
@@ -189,6 +183,8 @@ public class CrossableModel : MonoBehaviour
 
     void Update()
     {
+        if (CrossSectionObject == null)
+            return;
         UpdateBadContours();
         UpdateMaterials();
         CrossSectionSorter.Instance.NotifyFrameCrossableModel(this);
@@ -197,9 +193,8 @@ public class CrossableModel : MonoBehaviour
 
     public void SetRenderQueue(int render_queue)
     {
-        Debug.Log(gameObject.name + ": " + render_queue);
-        GetComponent<MeshRenderer>().material.renderQueue = render_queue;
-        GetComponent<MeshRenderer>().sharedMaterial.renderQueue = render_queue;
+        foreach(var material in GetComponent<MeshRenderer>().sharedMaterials)
+            material.renderQueue = render_queue;
         m_bad_contour_stub_material.renderQueue = render_queue;
     }
 

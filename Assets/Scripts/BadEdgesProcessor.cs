@@ -81,11 +81,9 @@ public class BadEdgesProcessor
                     bad_edges.Add(edge.Key);
                 }
             }
-            Debug.Log("Bad edge count: " + bad_edges.Count);
             if (bad_edges.Count == 0)
                 continue;
 
-            float eps = 0.001f;
             var cur_edge = bad_edges[0];
             var cur_point = cur_edge.StartPoint;
             BadContour cur_contour = new BadContour();

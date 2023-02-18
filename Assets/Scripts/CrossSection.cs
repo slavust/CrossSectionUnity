@@ -4,6 +4,8 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class CrossSection : MonoBehaviour
 {
+    private const float DEFAULT_SECTION_SIZE = 10.0f;
+
     public List<CrossSectionInfo> GenerateCrossPlanesList()
     {
         List<CrossSectionInfo> cross_sections = new List<CrossSectionInfo>();
@@ -26,6 +28,7 @@ public class CrossSection : MonoBehaviour
 
         return cross_sections;
     }
+
     void OnDrawGizmos()
     {
         Vector3[] ax1 = { new Vector3(0, 0, 0), new Vector3(1, 0, 0) };
@@ -59,8 +62,8 @@ public class CrossSection : MonoBehaviour
         {
             Gizmos.color = new Color(1, 1, 0);
             Gizmos.DrawLine(
-                transform.TransformPoint(line[0] * 2000),
-                transform.TransformPoint(line[1] * 2000)
+                transform.TransformPoint(line[0] * DEFAULT_SECTION_SIZE),
+                transform.TransformPoint(line[1] * DEFAULT_SECTION_SIZE)
                );
         }
     }
@@ -72,8 +75,8 @@ public class CrossSection : MonoBehaviour
         width_dir = width_dir * size / num_segments;
         height_dir = height_dir * size / num_segments;
 
-        Vector3 u_dir = new Vector2(1.0f / num_segments, 0);
-        Vector3 v_dir = new Vector2(0, 1.0f / num_segments);
+        Vector2 u_dir = new Vector2(1.0f / num_segments, 0);
+        Vector2 v_dir = new Vector2(0, 1.0f / num_segments);
 
         List<Vector3> vertices = new List<Vector3>();
         List<Vector2> uvs = new List<Vector2>();
@@ -111,8 +114,8 @@ public class CrossSection : MonoBehaviour
 
         Mesh plane_mesh = new Mesh();
         plane_mesh.vertices = vertices.ToArray();
-        plane_mesh.triangles = indices.ToArray(); //(indices.ToArray(), MeshTopology.Triangles, 0);
-        plane_mesh.uv = uvs.ToArray();
+        plane_mesh.triangles = indices.ToArray();
+        plane_mesh.SetUVs(0, uvs.ToArray());
 
         return plane_mesh;
     }
@@ -120,9 +123,9 @@ public class CrossSection : MonoBehaviour
     void CreateCrossSectionsRenderable()
     {
         CombineInstance[] combine = new CombineInstance[3];
-        combine[0].mesh = CreatePlaneMesh(2000.0f, new Vector3(1, 0, 0), new Vector3(0, 1, 0));
-        combine[1].mesh = CreatePlaneMesh(2000.0f, new Vector3(0, 1, 0), new Vector3(0, 0, 1));
-        combine[2].mesh = CreatePlaneMesh(2000.0f, new Vector3(0, 0, 1), new Vector3(1, 0, 0));
+        combine[0].mesh = CreatePlaneMesh(DEFAULT_SECTION_SIZE, new Vector3(1, 0, 0), new Vector3(0, 1, 0));
+        combine[1].mesh = CreatePlaneMesh(DEFAULT_SECTION_SIZE, new Vector3(0, 1, 0), new Vector3(0, 0, 1));
+        combine[2].mesh = CreatePlaneMesh(DEFAULT_SECTION_SIZE, new Vector3(0, 0, 1), new Vector3(1, 0, 0));
         MeshFilter filter = gameObject.GetComponent<MeshFilter>(); ;
         if (filter == null)
             filter = gameObject.AddComponent<MeshFilter>();
@@ -138,15 +141,15 @@ public class CrossSection : MonoBehaviour
 
     public void SetRenderQueue(int render_queue)
     {
-        Debug.Log(gameObject.name + ": " + render_queue);
         GetComponent<MeshRenderer>().sharedMaterial.renderQueue = render_queue;
     }
 
     public void Start()
     {
-        m_cross_section_material = new Material(Resources.Load<Material>("Materials/cross_section"));
-        m_cross_section_material.SetTexture("_SectionTex", Texture);
+        m_cross_section_material = new Material(Shader.Find("CrossSections/_CrossSection"));
+        m_cross_section_material.SetTexture("_SectionTex", HatchingTexture == null ? Texture2D.whiteTexture : HatchingTexture); ;
         m_cross_section_material.SetTextureScale("_SectionTex", TextureScale);
+        m_cross_section_material.SetColor("_SectionColor", HatchingColor);
         Reset();
         CreateCrossSectionsRenderable();
     }
@@ -166,19 +169,22 @@ public class CrossSection : MonoBehaviour
 
     void Update()
     {
-        CrossSectionSorter.Instance.NorifyFrameCrossSection(this);
     }
 
     void OnValidate()
     {
-        m_cross_section_material.SetTexture("_SectionTex", Texture);
+        if (m_cross_section_material == null)
+            return;
+        m_cross_section_material.SetTexture("_SectionTex", HatchingTexture == null ? Texture2D.whiteTexture : HatchingTexture);
         m_cross_section_material.SetTextureScale("_SectionTex", TextureScale);
+        m_cross_section_material.SetColor("_SectionColor", HatchingColor);
     }
 
 
 
-    public Vector2 TextureScale = new Vector2();
-    public Texture Texture = null;
+    public Vector2 TextureScale = new Vector2(1.0f, 1.0f);
+    public Texture HatchingTexture = null;
+    public Color HatchingColor = new Color(1, 1, 1, 1);
 
     private Material m_cross_section_material = null;
 }

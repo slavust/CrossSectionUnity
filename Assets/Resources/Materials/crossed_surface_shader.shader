@@ -1,4 +1,4 @@
-﻿Shader "Custom/CrossedSurface"
+﻿Shader "CrossSections/CrossedSurface"
 {
     Properties
     {
@@ -57,9 +57,9 @@
                 return is_invisible[0] && is_invisible[1] && is_invisible[2];
             }
 
-            float4 frag(float3 world_pos : TEXCOORD0) : COLOR
+            float4 frag(in VERT_OUT input) : COLOR
             {
-                if(IsFragmentClipped(world_pos))
+                if(IsFragmentClipped(input.world_pos))
                     discard;
                 return float4(1, 1, 1, 1);
             }

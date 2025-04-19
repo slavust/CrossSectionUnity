@@ -8,4 +8,4 @@ Also, see [usage demonstration video](https://youtu.be/QJXRe09cs34).
 Tested on Unity 2021.3.
 
 # Author
-Viacheslav Ustymenko, e-mail: homer at slavust.name
+Viacheslav Ustymenko, e-mail: vuslavust at gmail.com
